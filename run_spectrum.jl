@@ -3,17 +3,18 @@ push!(LOAD_PATH,"../src/")
 using SpectrumFields
 using CairoMakie
 using TimerOutputs
+using WriteVTK
 import Printf: @sprintf
 
 ### Replace with directory of vortex filaments
 
 # DireIN  = "/home/piotr-stasiak/simulations/foucault-test/OUTPUTS/VFdata/"
-DireIN = "/home/piotr-stasiak/simulations/counterflow/T2_1/"
-DireOUT = "/home/piotr-stasiak/simulations/counterflow/T2_1/"
+DireIN = "/home/piotr-stasiak/.tmp/VNS3/"
+DireOUT = "/home/piotr-stasiak/.tmp/VNS3/"
 
-iterations = [2000,9000]
+iterations =6401 
 
-### Writes as binary files
+### Writes as 3D binary files
 write_vorticity = false
 write_velocity = false
 
@@ -27,11 +28,11 @@ write_spectrum = true
 spectrum_compute = :from_fields
 
 ### Generates slice plots and energy spectrum plots for each iteration
-make_plot = false
+make_plot = false # -- NOT WORKING ---
 
 ### Set the backend for the computation
-using CUDA
-backend = CUDABackend()
+#using CUDA
+backend = CPU()#CUDABackend()
 
 # backend = CPU()
 
@@ -41,8 +42,8 @@ Ly = 1
 Lz = 1
 
 ### Resolution of generated field
-Nx = 512
-Ny = 512
+Nx = 512 
+Ny = 512 
 Nz = 512
 
 κ = 0.239f0 # Quantum of circulation
@@ -53,8 +54,10 @@ Nz = 512
 # n_diff = 1 Diffuses to the immediate vicinity and one further copy around and so on
 # n_diff is recalculated based on the the ratio of δ to the grid size
 n_diff = 24
-σ = 0.0075 |> Float32 #Size of the diffusion
-
+#σ = 0.0075 |> Float32 #Size of the diffusion
+σ = 0.01 |> Float32 #Size of the diffusion
+#σ = 0.025 |> Float32 #Size of the diffusion
+#σ = 0.05 |> Float32 #Size of the diffusion
 
 ###########################################################################################
 
@@ -97,7 +100,7 @@ function main()
 		println("Reading $VF_filename")
 		VF = load_VF_file(joinpath(DireIN, VF_filename),L)
 		tt = VF.time
-		println("Iteratiion successfully read at t=$(tt)!")
+		println("Iteration successfully read at t=$(tt)!")
 		@timeit to "Compute ΔR" ΔR = compute_ΔR(VF)
 
 		### Compute vorticity field in physical space
