@@ -9,21 +9,21 @@ import Printf: @sprintf
 ### Replace with directory of vortex filaments
 
 # DireIN  = "/home/piotr-stasiak/simulations/foucault-test/OUTPUTS/VFdata/"
-DireIN = "/home/piotr-stasiak/.tmp/VNS3/"
-DireOUT = "/home/piotr-stasiak/.tmp/VNS3/"
+DireIN = "/run/media/piotr-stasiak/Backup Plus1/foucault_data/Turbulence/co-flow/TG-Nv200-T0.0K/OUTPUTS/VFdata/"
+DireOUT = "/run/media/piotr-stasiak/Backup Plus1/foucault_data/Turbulence/co-flow/TG-Nv200-T0.0K/OUTPUTS/VFdata/"
 
-iterations =6401 
+iterations = 1500 
 
 ### Writes as 3D binary files
 write_vorticity = false
-write_velocity = false
+write_velocity = true
 
 ### Writes as VTK files and saves to pvd
 write_vorticity_vtk = false
 write_velocity_vtk = false
 
 ### Saves the 1D energy spectrum
-write_spectrum = true
+write_spectrum = false
 # spectrum_compute = :from_VF
 spectrum_compute = :from_fields
 
@@ -54,10 +54,10 @@ Nz = 512
 # n_diff = 1 Diffuses to the immediate vicinity and one further copy around and so on
 # n_diff is recalculated based on the the ratio of δ to the grid size
 n_diff = 24
-#σ = 0.0075 |> Float32 #Size of the diffusion
-σ = 0.01 |> Float32 #Size of the diffusion
-#σ = 0.025 |> Float32 #Size of the diffusion
-#σ = 0.05 |> Float32 #Size of the diffusion
+# σ = 0.0075 |> Float32 #Size of the diffusion
+# σ = 0.01 |> Float32 #Size of the diffusion
+# σ = 0.025 |> Float32 #Size of the diffusion
+σ = 0.05 |> Float32 #Size of the diffusion
 
 ###########################################################################################
 
@@ -159,6 +159,11 @@ function main()
 			generate_Plot("velocity_field_$itstr4.pdf", v, Ek_1D, kk, it)
 		end
 		
+		### Write the VF iteration to filename
+		open(joinpath(DireOUT,"spEkTime.dat"),"a") do io
+			writedlm(io, [it tt])
+		end
+
 		### Zero the fields to avoid errors in the next iteration
 		w .= 0.0
 		w_k .= 0.0
