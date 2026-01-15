@@ -3,16 +3,17 @@ push!(LOAD_PATH,"../src/")
 using SpectrumFields
 using CairoMakie
 using TimerOutputs
+using DelimitedFiles
 using WriteVTK
 import Printf: @sprintf
 
 ### Replace with directory of vortex filaments
 
 # DireIN  = "/home/piotr-stasiak/simulations/foucault-test/OUTPUTS/VFdata/"
-DireIN = "/run/media/piotr-stasiak/Backup Plus1/foucault_data/Turbulence/co-flow/TG-Nv200-T0.0K/OUTPUTS/VFdata/"
-DireOUT = "/run/media/piotr-stasiak/Backup Plus1/foucault_data/Turbulence/co-flow/TG-Nv200-T0.0K/OUTPUTS/VFdata/"
+DireIN = "/run/media/piotr-stasiak/Backup Plus/foucault_data/Turbulence/co-flow/T0.0K/TG-Nv400/OUTPUTS/VFdata/"
+DireOUT = "/run/media/piotr-stasiak/Backup Plus/foucault_data/Turbulence/circulation-study/coflow/"
 
-iterations = 1500 
+iterations = 300
 
 ### Writes as 3D binary files
 write_vorticity = false
@@ -23,7 +24,7 @@ write_vorticity_vtk = false
 write_velocity_vtk = false
 
 ### Saves the 1D energy spectrum
-write_spectrum = false
+write_spectrum = true
 # spectrum_compute = :from_VF
 spectrum_compute = :from_fields
 
@@ -31,10 +32,10 @@ spectrum_compute = :from_fields
 make_plot = false # -- NOT WORKING ---
 
 ### Set the backend for the computation
-#using CUDA
-backend = CPU()#CUDABackend()
+using CUDA
+# backend = CPU()#CUDABackend()
 
-# backend = CPU()
+backend = CUDABackend()
 
 ### Box size (in units of 2π)
 Lx = 1
@@ -46,8 +47,12 @@ Nx = 512
 Ny = 512 
 Nz = 512
 
-κ = 0.239f0 # Quantum of circulation
-δ = 0.1f0 # Discretisation of the lines
+κ = 0.200f0 # Quantum of circulation
+δ = 0.05f0 # Discretisation of the lines
+
+Δx = 2π/Nx
+
+
 
 ### Size of the diffusion box. Diffusing to 8*(1+n_diff)^3 grid points.
 # n_diff = 0 Diffuses to the immediate vicinity of the filament
@@ -56,8 +61,8 @@ Nz = 512
 n_diff = 24
 # σ = 0.0075 |> Float32 #Size of the diffusion
 # σ = 0.01 |> Float32 #Size of the diffusion
-# σ = 0.025 |> Float32 #Size of the diffusion
-σ = 0.05 |> Float32 #Size of the diffusion
+σ = Δx/4 |> Float32 #Size of the diffusion
+# σ = 0.05 |> Float32 #Size of the diffusion
 
 ###########################################################################################
 
@@ -170,9 +175,13 @@ function main()
 		v .= 0.0
 		v_k .= 0.0
 	end
-
-	write_vorticity_vtk && vtk_save(pvdVort) && printstyled("Saving vorticity paraview collection... \n", bold = :true, color = :green)
-	write_velocity_vtk && vtk_save(pvdVel) && printstyled("Saving velocity paraview collection... \n", bold = :true, color = :green)
+	if write_vorticity_vtk
+		vtk_save(pvdVort)
+		printstyled("Saving vorticity paraview collection... \n", bold = :true, color = :green)
+	elseif write_velocity_vtk
+		 vtk_save(pvdVel)
+		 printstyled("Saving velocity paraview collection... \n", bold = :true, color = :green)
+	end
 
 	printstyled("All done! \n", bold = :true, color = :green)
 	println(to)

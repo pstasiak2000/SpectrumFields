@@ -48,7 +48,7 @@ export compute_vorticity_field!
 end
 
 @inline function gaussian(x::SVector{3,Float32}, s::SVector{3,Float32}, σ::Float32)
-    return @fastmath 1 / √(2π * σ^2) * exp(-norm(x - s)^2 / (2 * σ^2))
+	return @fastmath 1 / ((√(2π))^3 * σ^3) * exp(-norm(x - s)^2 / (2 * σ^2))
 end
 
 """
