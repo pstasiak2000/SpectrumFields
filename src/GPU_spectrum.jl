@@ -42,9 +42,10 @@ export compute_vorticity_field!
     z_i = diffusion_box[3,k]
 
     x_R = @SVector [x[x_i],y[y_i],z[z_i]]
-    @inbounds w[x_i,y_i,z_i,1] += κ * gaussian(wrap_grid_points(x_R, Pos, L_d),Pos,σ) * ΔR[1]
-	@inbounds w[x_i,y_i,z_i,2] += κ * gaussian(wrap_grid_points(x_R, Pos, L_d),Pos,σ) * ΔR[2]
-	@inbounds w[x_i,y_i,z_i,3] += κ * gaussian(wrap_grid_points(x_R, Pos, L_d),Pos,σ) * ΔR[3]
+    Gauss = gaussian(wrap_grid_points(x_R, Pos, L_d),Pos,σ)
+    @inbounds w[x_i,y_i,z_i,1] += κ * Gauss * ΔR[1]
+	@inbounds w[x_i,y_i,z_i,2] += κ * Gauss * ΔR[2]
+	@inbounds w[x_i,y_i,z_i,3] += κ * Gauss * ΔR[3]
 end
 
 @inline function gaussian(x::SVector{3,Float32}, s::SVector{3,Float32}, σ::Float32)
